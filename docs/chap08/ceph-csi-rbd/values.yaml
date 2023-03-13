@@ -1,0 +1,247 @@
+---
+rbac:
+  # Specifies whether RBAC resources should be created
+  create: true
+
+serviceAccounts:
+  nodeplugin:
+    # Specifies whether a ServiceAccount should be created
+    create: true
+    # The name of the ServiceAccount to use.
+    # If not set and create is true, a name is generated using the fullname
+    name:
+  provisioner:
+    # Specifies whether a ServiceAccount should be created
+    create: true
+    # The name of the ServiceAccount to use.
+    # If not set and create is true, a name is generated using the fullname
+    name:
+
+# Configuration for the CSI to connect to the cluster
+# Ref: https://github.com/ceph/ceph-csi/blob/devel/examples/README.md
+# Example:
+# csiConfig:
+#   - clusterID: "<cluster-id>"
+#     monitors:
+#       - "<MONValue1>"
+#       - "<MONValue2>"
+csiConfig: []
+
+# Configuration for the encryption KMS
+# Ref: https://github.com/ceph/ceph-csi/blob/devel/docs/deploy-rbd.md
+# Example:
+# encryptionKMSConfig:
+#   vault-unique-id-1:
+#     encryptionKMSType: vault
+#     vaultAddress: https://vault.example.com
+#     vaultAuthPath: /v1/auth/kubernetes/login
+#     vaultRole: csi-kubernetes
+#     vaultPassphraseRoot: /v1/secret
+#     vaultPassphrasePath: ceph-csi/
+#     vaultCAVerify: "false"
+encryptionKMSConfig: {}
+
+# Set logging level for csi containers.
+# Supported values from 0 to 5. 0 for general useful logs,
+# 5 for trace level verbosity.
+logLevel: 5
+
+nodeplugin:
+  name: nodeplugin
+  # set user created priorityclassName for csi plugin pods. default is
+  # system-node-critical which is high priority
+  priorityClassName: system-node-critical
+  # if you are using rbd-nbd client set this value to OnDelete
+  updateStrategy: RollingUpdate
+
+  httpMetrics:
+    # Metrics only available for cephcsi/cephcsi => 1.2.0
+    # Specifies whether http metrics should be exposed
+    enabled: true
+    # The port of the container to expose the metrics
+    containerPort: 8080
+
+    service:
+      # Specifies whether a service should be created for the metrics
+      enabled: true
+      # The port to use for the service
+      servicePort: 8080
+      type: ClusterIP
+
+      # Annotations for the service
+      # Example:
+      # annotations:
+      #   prometheus.io/scrape: "true"
+      #   prometheus.io/port: "8080"
+      annotations: {}
+
+      clusterIP: ""
+
+      ## List of IP addresses at which the stats-exporter service is available
+      ## Ref: https://kubernetes.io/docs/user-guide/services/#external-ips
+      ##
+      externalIPs: []
+
+      loadBalancerIP: ""
+      loadBalancerSourceRanges: []
+
+  registrar:
+    image:
+      repository: registry.cn-beijing.aliyuncs.com/dotbalo/csi-node-driver-registrar
+      tag: v2.0.1
+      pullPolicy: IfNotPresent
+    resources: {}
+
+  plugin:
+    image:
+      repository: quay.io/cephcsi/cephcsi
+      tag: v3.3.1
+      pullPolicy: IfNotPresent
+    resources: {}
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  # If true, create & use Pod Security Policy resources
+  # https://kubernetes.io/docs/concepts/policy/pod-security-policy/
+  podSecurityPolicy:
+    enabled: false
+
+provisioner:
+  name: provisioner
+  replicaCount: 3
+  # if fstype is not specified in storageclass, ext4 is default
+  defaultFSType: ext4
+  # deployController to enable or disable the deployment of controller which
+  # generates the OMAP data if its not Present.
+  deployController: true
+  # Timeout for waiting for creation or deletion of a volume
+  timeout: 60s
+  # Hard limit for maximum number of nested volume clones that are taken before
+  # a flatten occurs
+  hardMaxCloneDepth: 8
+  # Soft limit for maximum number of nested volume clones that are taken before
+  # a flatten occurs
+  softMaxCloneDepth: 4
+  # Maximum number of snapshots allowed on rbd image without flattening
+  maxSnapshotsOnImage: 450
+  # Minimum number of snapshots allowed on rbd image to trigger flattening
+  minSnapshotsOnImage: 250
+  # skip image flattening if kernel support mapping of rbd images
+  # which has the deep-flatten feature
+  # skipForceFlatten: false
+
+  # set user created priorityclassName for csi provisioner pods. default is
+  # system-cluster-critical which is less priority than system-node-critical
+  priorityClassName: system-cluster-critical
+
+  httpMetrics:
+    # Metrics only available for cephcsi/cephcsi => 1.2.0
+    # Specifies whether http metrics should be exposed
+    enabled: true
+    # The port of the container to expose the metrics
+    containerPort: 8080
+
+    service:
+      # Specifies whether a service should be created for the metrics
+      enabled: true
+      # The port to use for the service
+      servicePort: 8080
+      type: ClusterIP
+
+      # Annotations for the service
+      # Example:
+      # annotations:
+      #   prometheus.io/scrape: "true"
+      #   prometheus.io/port: "8080"
+      annotations: {}
+
+      clusterIP: ""
+
+      ## List of IP addresses at which the stats-exporter service is available
+      ## Ref: https://kubernetes.io/docs/user-guide/services/#external-ips
+      ##
+      externalIPs: []
+
+      loadBalancerIP: ""
+      loadBalancerSourceRanges: []
+
+  provisioner:
+    image:
+      repository: registry.cn-beijing.aliyuncs.com/dotbalo/csi-provisioner
+      tag: v2.0.4
+      pullPolicy: IfNotPresent
+    resources: {}
+
+  attacher:
+    name: attacher
+    enabled: true
+    image:
+      repository: registry.cn-beijing.aliyuncs.com/dotbalo/csi-attacher
+      tag: v3.0.2
+      pullPolicy: IfNotPresent
+    resources: {}
+
+  resizer:
+    name: resizer
+    enabled: true
+    image:
+      repository: registry.cn-beijing.aliyuncs.com/dotbalo/csi-resizer
+      tag: v1.0.1
+      pullPolicy: IfNotPresent
+    resources: {}
+
+  snapshotter:
+    image:
+      repository: registry.cn-beijing.aliyuncs.com/dotbalo/csi-snapshotter
+      tag: v3.0.2
+      pullPolicy: IfNotPresent
+    resources: {}
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  # If true, create & use Pod Security Policy resources
+  # https://kubernetes.io/docs/concepts/policy/pod-security-policy/
+  podSecurityPolicy:
+    enabled: false
+
+topology:
+  # Specifies whether topology based provisioning support should
+  # be exposed by CSI
+  enabled: false
+  # domainLabels define which node labels to use as domains
+  # for CSI nodeplugins to advertise their domains
+  # NOTE: the value here serves as an example and needs to be
+  # updated with node labels that define domains of interest
+  # Copy from Dotbalo
+  domainLabels:
+    - failure-domain/region
+    - failure-domain/zone
+
+#########################################################
+# Variables for 'internal' use please use with caution! #
+#########################################################
+
+# The filename of the provisioner socket
+provisionerSocketFile: csi-provisioner.sock
+# The filename of the plugin socket
+pluginSocketFile: csi.sock
+# kubelet working directory,can be set using `--root-dir` when starting kubelet.
+kubeletDir: /var/lib/kubelet
+# Name of the csi-driver
+driverName: rbd.csi.ceph.com
+# Name of the configmap used for state
+configMapName: ceph-csi-config
+# Key to use in the Configmap if not config.json
+# configMapKey:
+# Use an externally provided configmap
+externallyManagedConfigmap: false
+# Name of the configmap used for encryption kms configuration
+kmsConfigMapName: ceph-csi-encryption-kms-config
