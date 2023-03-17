@@ -23,7 +23,7 @@
 
 # 勘误
 ### 非常抱歉给大家带来的不便，书中的错误更正如下：
-1. 182页 9.3.2小节 第一个`kubectl run`命令改为`kubectl create deployment nginx-server`，错误原因：由于版本问题，`kubectl run`变为了创建Pod，创建Deployment需要用`kubectl create deployment`。
+1. 182页 9.3.2小节 第一个`kubectl run nginx-server`命令改为`kubectl create deployment nginx-server`，错误原因：由于版本问题，`kubectl run`变为了创建Pod，创建Deployment需要用`kubectl create deployment`。
 2. 77页
 ````
 successThreshold: 1 # 表示检查成功1次表示就绪
