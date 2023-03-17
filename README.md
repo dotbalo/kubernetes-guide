@@ -30,3 +30,6 @@ successThreshold: 1 # 表示检查成功1次表示就绪
 failureThreshold: 2 # 检测失败2次表示未就绪
 ````
 3. 71页 Node节点描述的Docker Engine: 负责对容器的管理，写成了负载对容器的管理
+4. 14页 1.5集群初始化小节上面一行：`如果ping不通且telnet没有出现`，应该为`如果ping不通或telnet没有出现"]"`
+5. 第5页和第27页的`git clone https://gitee.com/dukuan/k8s-ha-install.git`，应该为：`git clone https://gitee.com/dukuan/k8s-ha-install.git; git checkout manual-installation-v1.22.x`
+6. 第35页、36页、37页、41页的`如果不是高可用集群，把Master的地址改为10.0.0.236:16443，把APIServer的端口改为16443，默认是6443`表述错误，正确应该为：`如果不是高可用集群，修改--server=https://10.0.0.236:16443为--server=https://Master节点的IP:6443即可`
